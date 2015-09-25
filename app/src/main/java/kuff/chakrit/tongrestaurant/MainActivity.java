@@ -1,10 +1,14 @@
 package kuff.chakrit.tongrestaurant;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.StrictMode;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
+import android.widget.EditText;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -23,6 +27,9 @@ public class MainActivity extends AppCompatActivity {
     //Explicit
     private UserTable objUserTable;
     private FoodTable objFoodTable;
+    private EditText userEditText, passwordEditText;
+    private String userString, passwordString;
+
 
 
 
@@ -30,6 +37,10 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        //Bind Widget
+        bindWidget();
+
 
         //Create and Connect SQLite
         createAndConnected();
@@ -45,6 +56,73 @@ public class MainActivity extends AppCompatActivity {
 
 
     }   //Main Method  onCreate
+
+    public void clickLogin(View view) {
+
+        userString = userEditText.getText().toString().trim();
+        passwordString = passwordEditText.getText().toString().trim();
+
+        if (userString.equals("") || passwordString.equals("")) {
+
+            //Have space
+            myAlertDialog("มีช่องว่าง","กรุณากรอกทุกช่อง นะคะ");
+
+        } else {
+
+            //No Space
+            checkUser();
+
+
+        }
+
+
+    }   //clickLogin
+
+    private void checkUser() {
+        try {
+
+            String[] strMyResult = objUserTable.searchUser(userString);
+
+            if (passwordString.equals(strMyResult[2])) {
+
+                welcome(strMyResult[3]);
+
+            } else {
+
+                myAlertDialog("Password False", "Please try again Password false");
+
+            }
+
+        } catch (Exception e) {
+            myAlertDialog("No User", "No " + userString + " in my database");
+        }
+
+
+    }   //Check User
+
+    private void welcome(String strName) {
+
+    }   //Welcome
+
+    private void myAlertDialog(String strTitle, String strMessage) {
+        AlertDialog.Builder objBuilder = new AlertDialog.Builder(this);
+        objBuilder.setIcon(R.drawable.danger);
+        objBuilder.setTitle(strTitle);
+        objBuilder.setMessage(strMessage);
+        objBuilder.setCancelable(false);
+        objBuilder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                dialogInterface.dismiss();
+            }
+        });
+        objBuilder.show();
+    }   //My Alert Dialog
+
+    private void bindWidget() {
+        userEditText = (EditText) findViewById(R.id.editText);
+        passwordEditText = (EditText) findViewById(R.id.editText2);
+    }
 
     private void synJSONtoSQLite() {
 
